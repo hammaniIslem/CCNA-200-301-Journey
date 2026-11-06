@@ -6,17 +6,14 @@
 - Understand switches and routers.
 - Understand the role of firewalls.
 
-## Anki
-- [ ] Review Day 1 flashcards.
-- [ ] Complete today's Anki reviews.
-
 ## Quiz
 Score:  4/5
 
 ## Difficulties
+none
 
 ## Progress
 - [✅] Lecture completed
-- [] Flashcards completed
-- [] Lab completed
+- [✅] Flashcards completed
+- [✅] Lab completed
 - [✅] Quiz completed
