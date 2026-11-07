@@ -21,11 +21,6 @@ This repository documents my progress through the course, practical networking e
  Anki                | Spaced repetition and flashcards 
  Jeremy's IT Lab     | Main CCNA learning resource 
 
-## Progress Tracker
-
-|   Day  | Topic                 | Status |
-| Day 01 | Network Devices       | ⬜ Not started |
-
 ## Practical Labs
 
 Each lab will include:
@@ -36,7 +31,7 @@ Each lab will include:
 - Configuration commands
 - Verification and testing
 - Troubleshooting notes
-- Packet Tracer project file (`.pkt`)
+- Packet Tracer project 
 
 ## Anki Flashcards
 
@@ -48,6 +43,3 @@ Flashcards will help reinforce:
 - Subnetting
 - Switching and routing concepts
 - Troubleshooting scenarios
-
-
-*This is a personal educational project*
