@@ -1,0 +1,234 @@
+
+
+objective:
+what does 10/100/1000 BASE-T ports(1 - 24) - ports are auto-MDIX
+stand for?
+
+
+- what is RJ-45
+
+	it is the coper wire we use to connect in Ethernet connection
+
+ Ethernet is a set of standards/protocols in      iEEE 802.3
+
+
+--------------------------------------------------------------------------------------
+
+
+- the speed of the signal is mesured in bits by second
+
+
+speed        |     name          |     standard    |     informal name
+
+10 Mbps      |   Ethernet        |     802.3 i     |   10 Base-T
+
+100 Mbps     |  Fast Ethernet    |     802.3 u     |   100 Base-T
+
+1000 Mbps    |  Gigabit Ethernet |     802.3 ab    |   1000 Base-T
+
+10 Gbps      | 10Gig Ethernet    |     802.3 an    |   10 G Base-T
+
+
+all ethernet connect maimum of 100 meters
+
+
+------------------------------------------------------------------------------------
+
+
+- most common ethernet cables are UTP cables (Unshilded Twisted Pair)
+
+	the twist help against EMI (electroMagnetic interference)
+
+
+
+----------------------------------------------------------------------------------------
+
+
+10Base-T and 100Base-T use only 2 pairs (4 wires)
+
+1000Base-T and 10GBase-T use all 4pairs(8 wires)
+
+
+
+routers , PCs and FireWalls use the pins :
+			(1 and 2) for Transmition (TX)
+		and     (3 and 6) for recieving (Rx)
+
+while the switch use the pins:
+			(1 and 2) for recieving (Rx)
+		and    	(3 and 6) for Transmition (TX)
+
+
+
+     (TX 1-2)------------------(RX 1-2)            (TX 3-6)----------------(RX 3-6)
+
+Pc                                        Switch                                      router
+
+     (RX 3-6)------------------(TX 3-6)            (RX 1-2)----------------(TX 1-2)
+
+
+
+this type of wire is -straight-through cable- because it uses the same pins each side
+
+
+- but what if we connect two of the same device or a pc with a router , or rowter to firewall
+ 
+here we use -crossover cable-
+
+     (TX 1-2) ---------   --------- (TX 1-2)           
+                       \ /    
+ Pc                     X                     Pc 
+		       / \
+     (RX 3-6) ---------   --------- (RX 3-6)         
+
+
+
+most modern devices use auto-MDIx to dicover the pins each device uses and switch one to match the other
+
+
+     (RX 1-2)------------------(TX 1-2)           
+
+Switch          auto-Mdix on           Switch (reversed)
+
+     (TX 3-6)------------------(RX 3-6)        
+
+
+
+because we connect the two devices in two channels , both of them can send and receive data at the same time ,
+we call it full duplex transmission
+    
+----------------------------------------------------------------------------------------------------------
+
+
+all these were only using 2 pairs(4 wires) in 10Base-t and 100Base-T
+
+
+but in 1000Base-T and 10GBase-t we use all 4pairs ,and in addition to that each pair is
+-Bidirectional -which means a single pair can send and receive data at the same time ,giving much higher speed
+
+
+----------------------------------------------------------------------------------------------------------
+				
+						FIBER
+
+
+for larger Networks we use Fiber optics instead of copper
+
+to plug it to a switch we need a -SFP- (small form-factor pluggable) 
+
+the fiber optic cable uses two wires one for transmition and the other for receiving
+
+         sfp (TX) ------------------------------ (Rx) sfp 
+switch                                                      switch
+         sfp (RX) ------------------------------ (Tx) sfp
+
+
+the cable itself has 4 layers
+1/ the glass core that transmits light
+2/ cladding that reflects light
+3/ a protctive buffer,(protect from breaking)
+4/ the outer jacket
+
+
+there are two types of fiber cables 
+
+1- multi mode 
+allows multiple light signals (modes) to travel at once with different angles
+the cabbles are cheaper , and use LED based SFPs 
+it has a wider glass core 
+
+2-single mode
+allows a single mode to be transmitted, and it's sent by a Laser SFP
+the cable is more expensive than multi mode
+it has a narrow glass core and a wider cladding for protection
+
+
+
+    speed        |         cable type        |     standard    |     informal name   |    maximum length
+
+    1  Gbps      |  multiMode or single-mode |     802.3 z     |     1000 Base-LX    | 550m (MM) - 5Km(SM)
+
+    10 Gbps      |          multiMode        |     802.3 ae    |     10 G Base-SR    |        400 m
+
+    10 Gbps      |         single-mode       |     802.3 ae    |     10 G Base-LR    |        10 Km
+
+    10 Gbps      |         single-mode       |     802.3 ae    |     10 G Base-ER    |        30 Km
+
+
+
+
+#####################################	 Quiz	###################################
+
+
+
+## Q1 - you connect tow old routers together with a UTP cable , however data is not successfully sent and received between them. what could be the problem
+
+1/ they are connected with a straight-through cable 
+2/ they are connected with a cross-over cable
+3/ they are operating in auto-MDIX mode
+
+
+my answer is            1/ they are connected with a straight-through cable 
+
+solution : ✅ to connect with the same device type you need a cross-over cable , or have auto-MDIX enabled, which in this case can't do
+
+
+
+
+## Q2 -your company wants to connect switches in two separate buildings that are about 150 meters apart 
+, they want to keep costs down , if possible what kind of cable should they use
+
+1/ UTP
+2/ single-mode fiber
+3/ multi-mode fiber
+
+my answer is            3/ multi-mode fiber
+
+solution : ✅ UTP cables can't reach 150m ,and single-mode is more expensive
+
+
+
+
+## Q3 - your company wants to connect tow offices that are about 3 kilometers apart
+, they want to keep costs down if possible, which kind of cable should they use
+
+1/ UTP
+2/ single-mode fiber
+3/ multi-mode fiber
+
+my answer is           2/ single-mode fiber
+
+solution : ✅   both UTP and multi-mode can't reach 3 kilometers
+
+
+
+
+## Q4 - a switch has the following indication over it's network interfaces
+     10/100/1000 BASE-T ports(1 - 24) - ports are auto-MDIX
+what would happen if you connect to an identical switch with a straight-through cable 
+
+1/ they would operate normally
+2/ they would operate at a reduced speed
+3/ they would be unable to communicate
+
+
+my answer is           1/ they would operate normally
+
+solution : ✅   because of the auto-MDIX
+
+
+
+
+## Q5 - your company wants to connect many hosts to a switch 
+which is in the same office floor as the hosts , what kind of cable should they use
+
+
+1/ UTP
+2/ single-mode fiber
+3/ multi-mode fiber
+
+my answer is          1/ UTP
+
+solution : ✅ most hosts dont have SFPs to connect
+, and switches dont have that many SFP ports either
+, so a UTP copper cable is sufficient to connect these hosts
