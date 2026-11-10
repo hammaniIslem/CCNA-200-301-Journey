@@ -1,4 +1,0 @@
-what does 10/100/1000 BASE-T ports(1 - 24) - ports are auto-MDIX
-stand for?
-
-
