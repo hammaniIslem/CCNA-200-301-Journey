@@ -1,0 +1,260 @@
+
+ what is TCP/IP model?
+   a suite of protocols that make connection to the internet and other networks possible
+
+
+===================================      protocol       ======================================== 
+
+
+ a protocol:
+
+    is a set of rules on how data should be communicated over the network
+
+we use the protocols to avoid the incompitability between the devices of different vendors(ibm ,apple ,microsoft ...)
+
+
+===================================      standatd           ======================================== 
+
+ a standard :
+
+    is an agreed-apon specifcation to describe how the protocal should work
+
+
+
+
+standars are made by independent organizations such as :
+
+ the IEEE (Institute of Electrical and Electronics Engeneers)
+    developed most of the Local Area Networks like (Eternet 802.3) and Wi-Fi(802.11)
+
+ the IETF (Internet Engeneering Task Force)
+    open community that defined protocoles used in the internet like TCP, IP ,UDP, HTTP, DNS .... 
+
+
+
+  we group the protocols and their jobs in "LAYERS" to make the understanding onf the communiction much easier\
+each layer can transfer and receive data from the layer above it and bellow it  
+
+
+we can define the TCP/Ip model as follows:
+
+				APPlication Layer       (http , Ftp ..)
+
+				Transport Layer         (TCP ,UDP ...)
+
+				Internet Layer          (Ip)
+
+				Local Network Layer     (ARP..)
+
+				Physical Layer          actual cables and signals
+
+
+
+===================================      example     ======================================== 
+
+pc ----- switch ----- router ----- router ----- switch ----- server
+
+to connect to website on the server we use a browser        - application Layer
+the connect to the web browser we connec to port 80         - transport Layer
+using the server's name that resolves to an ip address      - Internet Layer 
+the message gets transfered between defernt networks (hops) - Local Network Layer
+transmited by electrical , optical, or radio signals        - Physical Latyer
+
+==================================        Layers         =======================================
+
+
+
+1 / the physical Layer (Layer one)
+responsible of sending/ receiving data bits as electrical , optical, or radio signals
+defines hings like cables , signal levels , and link speed
+
+example : UTP cables, fiber-optics, wi-fi , antennas, network interfaces(NIC cards)
+
+
+
+
+2 / local network Layer (Layer 2)
+provides hop-to-hop delivary of mesages on a local network
+a hop is a step to reach the destination 
+switches don't count as hops
+uses MAC addresses to identify interfaces
+
+
+example : Ethernet(802.3), Wi-Fi(802.11), STP (Spanning tree Protocol)
+
+
+
+
+
+3/ Internet / network LAyer (Layer 3)
+provides end to end connection usin ip to identify the hosts till it reaches the destination
+internet  = interNetwork (between networks)
+routers operate mainely in this Layer 
+more protocols live in this Layer
+
+example : ipV4, ipV6 , icmp..... 
+
+
+
+
+
+4 / Transport Layer (Layer 4)
+
+this layer is responsible of the Communication between the application proccesses
+by using the port numbers to identify which process is responsible of the connection
+port number as in the logical ports  (0 to 65,535)
+
+also have two main protocols 
+    UDP( User Datagram Protocol ) simple and efficient
+    TCP( Transmission Control Protocol) more trusted to deliver data
+
+example :
+ 	https request(port 443) over TCP (default)
+
+
+
+
+5 / Application Layer  (Layer 5) also called (Layer 7 based on OSI model)
+
+this is where network meets applications 
+the user uses services to perform tasks , each with it's protocol
+
+example :
+	browsing the web (http/https)
+	file Transfer (ftp/tftp)
+	mail messages (pop, smtp, IMAP) 
+
+
+ 
+
+============================      encapsulation and decapsulation         ======================================== 
+
+		
+each Layer adds more information to the actual data in order to communicate with the neighbor layer
+the proccess going down is encapsulation
+
+the information on each level is called protocol data Unit (PDU) 
+the content without header/trailer is called Payload
+
+
+
+ 
+ Layer         |           data name               |                                                protocol data Unit (PDU)                                 |         payload 
+
+ application   |                                   |                                                         data                                            |
+
+ Transport     |   segement (TCP)  datagram (UDP)  |                                        (L4 header)  +   data                                            |         data
+  
+ Internet      |               Packet              |                        (L3 header)  +   L4 header   +   data                                            | segement (TCP)  datagram (UDP) 
+ 
+ Local Network |               frame               |         (L2 header)  +  L3 header   +   L4 header   +   data   +  (L2 Trailer) transmission error check |         Packet              
+
+ Pysical       |               bits                |            01000010 10111010 01010011 11100100 00101001 10100100                                        |          frame               
+
+					
+				then transfered to destination
+
+
+going up on the destination device the physical Layer gets the bits back to data 
+then each Layer decapsulates the data to read it and send it upwards to the next Layer 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                     - 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
