@@ -285,11 +285,11 @@ if we type          Router (config) # no service password-encryption
 future passwords won't be encrypted , old one stay the same, no decryption
 
 
----------------------------------------------------run ----------------------------------------------------
+---------------------------------------------------do----------------------------------------------------
 
-run is made to use previlaged mode commands straight from config mode 
+   " do "   is made to use previlaged mode commands straight from config mode 
 
-			Router (config) #run show running-config
+			Router (config) #do show running-config
 
 
 
