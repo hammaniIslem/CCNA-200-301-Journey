@@ -1,4 +1,4 @@
-# Day 01 - Network Devices
+# Day 02 - cables and interfaces
 
 ## Learning Objectives
 - Understand wired connection
