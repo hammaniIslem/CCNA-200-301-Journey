@@ -1,0 +1,394 @@
+
+===========================================        CLI       =============================================
+
+					command-line interface
+
+it is the interface which we configure devices on 
+
+===========================================        GUi       =============================================
+
+					Graphical User Interface
+
+
+a visual interface that we also use to configure, easy to use an show things in an organized way
+
+in the real world as Network engineers we use CLi more offten
+
+
+
+
+===========================================     console      =============================================
+
+to connect to a device using a PC,  we phisicaly connect our PC to the device using a (CONSOLE cable)  
+
+the console has two cable ports (Rj-45 on a side and db9 on the other)
+most pcs don't have a serial port to connect the db9 anymore so we use an adapter
+
+the formal name of the console is the (Roll-over cable) because of the way its wires are rolled
+			
+
+				.1  --------  8.
+				.2  --------  7.
+				.3  --------  6.
+		pc		.4  --------  5.           device
+				.5  --------  4.
+				.6  --------  3.
+				.7  --------  2.
+				.8  --------  1.
+
+
+to actually access the device we need a Terminal Emulator 
+
+the most common one is   putty
+
+=========================================        putty      ======================================================
+
+
+on putty we choose    connection -> Serial to specifically use console 
+
+here are some default settings to know
+
+speed :9600 bits per second  
+data bits : 8 
+stop bits : 1      for each 8 bits of data a stop bit is sent
+parity : none                   used to detect errors
+flow control : none            controll the data direction flow
+
+
+these setting aren't included in the exam
+
+
+
+=========================================     User exec mode    ======================================================
+
+
+once connected we see this sign (a router in this example) :
+
+                                          (     Router >    )
+
+which indicates for the most basic mode (User exec mode) defined by greater than (>)
+
+the default name of the device is ( Router )
+
+
+in this mode , user can only look at some things , but can't configure or modify anything
+
+
+========================================     previlaged exec mode    ======================================================
+
+
+if we type :
+	
+		Router> enable
+		
+
+we enter the second mode (previlaged exec mode) and change to this sign:
+
+                                          (     Router #    )
+
+has more commands than user mode
+
+here we can view the configurations , restart the device .... 
+
+we can't yet configure the device , by=ut we can change simple things 
+, like time for example
+
+
+
+==========================================     cli tips and tricks   ==================================================
+
+----------------------------------------shortcuts-----------------------------------------
+if we type 
+
+			Router>en
+
+the device can understand the command if it's the only one starting with these letters
+
+------------------------------------------tab------------------------------------------------
+
+we can also press tab for auto complete 
+
+			Router>en            (press tab)
+	  ----->	Router>enable
+
+
+
+if there is more than one command , it becomes ambiguous
+
+
+------------------------------------------------suggestions------------------------------------
+
+to avoid that we use the     ==  ?  == without space
+
+
+			Router>e?
+   			enable  exit
+
+the device suggest all the command starting with that line
+
+
+
+if we add the space between 
+it gives us suggestion about the word that comes after
+
+			Router#configure ?
+			terminal
+			Router#configure terminal
+
+if no word next it shows <cr>
+
+
+
+we use exit to go back in modes
+
+			Router#exit
+			Router>
+
+-----------------------------------------delete a command ---------------------------------------
+
+we type the command again with " no " before it
+
+========================================    Global configuration mode    ======================================================
+
+to enter the configuration mode we type 
+
+			Router#configure terminal
+
+and the sign changes to this
+
+			Router(config) #
+
+
+here we have full access to the device 
+
+========================================   commands   ===============================================================================
+
+change host name
+			Router (config) # hostname R1
+			R1(config) # 
+
+add password to the previlaged mode 
+
+			Router (config) # enable password epicPassword
+
+if we go back to user mode it will demande a password 
+			
+			Router>enable
+			Password:         (the letters get typed but never shown as a security measurement)
+			Router#
+
+remark : you only have 3 tries
+
+----------------------------------------in memory configuration -------------------------------------------------
+
+there is two configuration files in each device 
+
+             	  	1 /   startup-configuration      
+			2 /   running-configuration
+
+on each boot the device load the default startup-configuration file 
+
+the running-config file is the commands we typed on the device but not et saved
+the running-configuration file gets deleated if we restart or shut down the device
+and the device get back to the default startup-config
+
+
+example 		Router# show running-config
+
+			version 15.1
+			hostname Router
+			!
+			!
+			enable password epicPassword
+			.
+			.
+			.
+
+
+
+			Router#show startup-config
+			startup-config is not present 
+
+
+till we save the running-config to the startup-config the file remains empty
+
+
+----------------------------------------------save config--------------------------------------------------
+
+there is 3 ways to  save the config to the startup-config
+
+
+1 /			Router# write 
+2 / 			Router# write memory
+3 / 			Router# copy running-config startup config
+
+		
+ 			Router#show startup-config
+			version 15.1
+			hostname Router
+			!
+			!
+			enable password epicPassword
+			.
+			.
+			.
+
+
+
+------------------------------------------------   password security  -----------------------------------------------------
+
+when showing the configuration  ,the password are shown in plain text 
+to secure it we use 
+			Router (config) # service password-encryption
+
+			Router#show running-config
+			version 15.1
+			hostname Router
+			!
+			!
+			enable password 7 08e023A52B5
+			.
+			.
+			.
+
+
+we notice that th password is now encrypted 
+, the 7 indicates (encryption type 7) provided by cisco  which remains a weak way of security
+
+
+-----------------------------------------------enable secret--------------------------------------------------------
+
+to have a better security , instead of password we use secret
+
+			Router (config) # enable secret cisco
+
+			Router# show running-config 
+			version 15.1
+			hostname Router
+			!
+			!
+			enable secret 5 dfeaf10390e560aea745ccba53e044ed
+			enable password 7 08e023A52B5
+			.
+			.
+			.
+
+
+the password is more secured now , the 5 represents md5 hashing whivch is more secure than type 7
+
+
+now both the password are set for the enable , so the device uses secret by default because it is more secure
+
+
+if we type          Router (config) # no service password-encryption 
+
+future passwords won't be encrypted , old one stay the same, no decryption
+
+
+---------------------------------------------------run ----------------------------------------------------
+
+run is made to use previlaged mode commands straight from config mode 
+
+			Router (config) #run show running-config
+
+
+
+#####################################	 Quiz	###################################
+
+
+
+## Q1 - what kind of cable is used to connect to a cisco device via the RJ-45 console port ?
+
+1/ rollover cable
+2/ crossover cable
+3/ USB cable
+
+my answer is            1/ rollover cable
+
+
+solution : ✅  
+
+
+
+## Q2 - type of enable to enter privilaged exec mode on your cisco device
+, however rh password you entered is not accepted , what could be the problem ?
+
+1/ service password-encryption is enabled
+2/ service password-encryption is disabled
+3/ cap locks is on 
+
+my answer is            3/ cap locks is on 
+
+
+solution : ✅  cisco password are case sensitive so lower and upper case aren't the same thing
+service password-encryption doesn't affect the passwords , only how they are shown
+
+
+
+## Q3 - what is the most secured method to protect the access to the previlaged Exec mode
+
+1/ enable secret 
+2/ enable password
+3/ enable password , with service password encryption
+
+my answer is           1/ enable secret 
+
+solution : ✅   enable secret uses md5 to encrypt the password
+
+
+
+
+## Q4 - if both enable password and enable secret are configured , what will happen when you use enable to enter previlaged mode  
+
+1/ you must enter the enable password , followed by the enable secret
+2/ you must enter the enable password only 
+3/ you must enter the enable secret only 
+
+
+my answer is           3/ you must enter the enable secret only 
+
+solution : ✅   enable password gets egnored if the secret is configured
+
+
+
+
+## Q5 - you enter the conf t command to enter global configuration mode, what is the full length version of the command?
+
+1/ configuration time
+2/ configure terminal
+3/ Configuration terminal
+
+my answer is          2/ configure terminal
+
+solution : ✅ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
