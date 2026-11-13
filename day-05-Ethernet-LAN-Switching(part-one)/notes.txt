@@ -1,0 +1,281 @@
+
+the role of a switc is to connect multiple devices to make one big LAN
+
+but how does he Know where to send the data?
+
+
+==========================================   MAC Address   =================================================================================
+
+   -  each device in the world has a unique Mac address ( Media Access Controll )
+
+	also known as 'BIA' Burned-In address
+
+ with 6 bytes (48 bits)  writen in 12 Hexadecimal digits  , exaple : 00:1A:2B:3C:4D:5E
+
+
+-the first half is the same for devices of the same company , and the rest for the device 
+and called " O U I " Organizationally Unique Identifier
+
+==========================================   Frame   =======================================================================================
+
+the L2 PDU (The Frame) is devides as follows 
+
+
+     			|  Header  |     Packet    |  Trailer  |
+
+
+------------------------------------------   Header   ---------------------------------------------------
+
+
+the header Contains 5 parts:
+
+
+1 / 	| preamble | has 7 bytes , structures of 7 bytes of alternatin 1 and 0 like this : 10101010 
+				
+			01010101 01010101 01010101 01010101 01010101 01010101 01010101 
+
+		responsible on the syncronization between devices Clockes
+
+2/ 	| SPD | one byte of alternatin 1 and 0 except of the last bit : 10101011
+
+		(start Frame delimiter) indicates the end of the preamble and the start of the frame
+
+
+3/      | Destination |   the MAC Address of the device receiving the frame
+
+4/ 	| source |	  the MAC Address of the sending Device
+
+
+5/      |Type / length|  a fiel of 2 Bytes 
+			
+		if the Value is 1500 or less it indicates for length (in Bytes)
+		
+		if it is 1536 or greater it indicates the type (usually ipv4 or ipv6) 
+			and the length is determined in other methods
+
+		 0x0800 for IPv4  (2048)
+		 0x86DD for IPv6  (34525)
+
+			0x means Hexadecimal
+
+------------------------------------------   Trailer   ---------------------------------------------------
+
+
+as for the Trailer we have on Field
+
+
+1/	| FCS | Frame check Sequence (4 Bytes) 32 bits
+
+	use to detect corrupted data using the " CRC " algorithm
+	
+	CRC stands for Cyclic Redundency Check
+	
+
+==========================================   Network   =======================================================================================
+
+
+ 	  AAAA.AA00.0001			    AAAA.AA00.0002
+			     F0/1       F0/2
+		pc1 ------------- Switch ------------- pc2
+    	                           |  F0/3
+    	                           |	
+    	                           |
+    	                           Pc3
+	
+			     AAAA.AA00.0003
+
+
+-------------------------------------------   task ---------------------------------------
+
+send a frame from pc1 to pc3 (Dist: AAAAAA000003, Src :AAAAAA000001)
+
+1/ pc1 send the frame to the switch 
+
+2/ the switch checks the Switching table 
+(the Table is a pair of MACs and the port which the switch can reach it from)
+
+		|  Mac  | Interface |
+		|       |           |
+
+the Table is Empty
+
+3/ the switch adds the new pair
+
+		|  Mac  | Interface |
+		| .0001 |    F0/1   |     pc1 .0001 is reachable from port F0/1
+
+
+4/ the switch is unable to send the frame specificalyy to pc3
+
+   -------------we call it an UnKnown unicast frame ---------> flood      -------------
+		
+so he flood the frame to all connected devices (except the one that received  it)
+
+
+
+					frame -→
+          AAAA.AA00.0001			    AAAA.AA00.0002
+			     F0/1       F0/2
+		pc1 ------------- Switch ------------- pc2
+    	                           |  F0/3
+    	               frame  |    |	
+    	                      ↓    |
+    	                           Pc3
+	
+			     AAAA.AA00.0003
+
+5/ after receiving the frame pc2 and pc3 check the destination Mac if it matches with theirs
+pc2 drops the frame , and pc3 accepts it
+
+----------------------------------------  result  -----------------------------------------------------
+
+			     pc3 got the frame seccessfully 
+
+	
+----------------------------------------  Task two  -----------------------------------------------------
+
+pc3 wants to send a frame to pc1
+
+1/ pc3 sends the packet to the switch 
+
+2/ the switch adds the new pair to the Switching Table 
+
+		|  Mac  | Interface |
+		| .0001 |    F0/1   |     pc1 .0001 is reachable from port F0/1
+		| .0003 |    F0/3   |     pc3 .0003 is reachable from port F0/3
+
+3/ the switch checks the Mac table for the Destination
+
+there is a match 
+
+4/ instead of flooding the network the switch can Forwart the message straight to pc3 using port F0/3
+
+
+   -------------we call it a Known unicast frame  ------>   Forward       -------------
+
+
+
+
+this way of learning the Mac addresses is called Dynamic Mac Address 
+
+
+each pair on the table stays for 5 minutes of inactivity before getting deleted
+
+
+
+#####################################	 Quiz	###################################
+
+
+
+## Q1 - which field of an Eternet Frame provides receiver clock synchronization ?
+
+1/ pramble
+2/ SFD
+3/ type
+4/ FCS
+
+my answer is            1/ pramble
+
+
+solution : ✅  sfd is for the end of the preamble,and Fcs is to check for data corruption
+
+
+
+## Q2 - how long is the physical address of a network device?
+
+1/ 32 bytes
+2/ 32 bits
+3/ 48 bytes
+4/ 48 bits
+
+my answer is            4/ 48 bits
+
+
+solution : ✅  the Mac address is 6 bytes corresponding to 48 bits
+
+## Q3 - what is the OUI of this MAC address :  E8BA.7011.2874 ?
+
+1/ E8BA 
+2/ E8BA.70
+3/ 7011
+4/ E8BA.7011
+
+my answer is           2/ E8BA.70
+
+solution : ✅   the OUI is the first half of the MAC Adress
+
+
+
+## Q4 - which feild of the frame does a switch use to populate it's MAC address table
+
+1/ preamble
+2/ length
+3/ source
+4/ destination
+
+my answer is           3/ source
+
+solution : ✅  the source is the sender
+
+
+
+
+## Q5 - what kind of frame does a switch flood out of all interfaces except the one it was received from
+
+1/ Unknown unicast
+2/ Known unicast
+3/ Allcast
+
+my answer is          1/ Unknown unicast
+
+solution : ✅   All cast is not a real type of cast, and in  known unicast we simply forward the frame
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
