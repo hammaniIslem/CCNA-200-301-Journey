@@ -157,9 +157,17 @@ on a switch we don't use arp -a  , instead we use this command to see the actual
 	switch# show mac address-Table 
 
 
-    |  vlan |    Mac address   |   Type   | ports 
-    |   1   |  0C2F.B011.9D00  |  dynamic | gi0/0
+    |  vlan |    Mac address   |   Type   |  ports 
+    |   1   |  0C2F.B011.9D00  |  dynamic |  gi0/0
     |   1   |  0C2F.B06A.3900  |  dynamic | gi0/2
+
+
+and this command to see the ARP Table 
+
+
+   protocol  |      Address     |  Age  |   hardware  address   |   Type   |  interface
+   Internet  |    192.168.1.1   |    3  |     0C2F.B011.9D00    |   ARPA   |    gi0/0
+   Internet  |    192.168.1.3   |    -  |     0C2F.B06A.3900    |   ARPA   |    gi0/2
 
 ------------------------------------Mac address removal------------------------------------------------
 
