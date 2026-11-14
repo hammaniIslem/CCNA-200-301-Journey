@@ -1,0 +1,379 @@
+
+
+------------------------------------ additional info on frames ------------------------------
+
+
+we learned before about the Frame parts
+
+the (preamble + sfd) are usually not consider part of the frame header  ,yet they still get sent with it
+
+
+
+which means the actual size of the header+Trailer is 18 (6+6+2+4)  
+
+-  the minimum size of a frame is 64 bytes (not counting the preamble and sfd )
+
+which leaves 46 bytes for the actual payload (packet)
+
+-   if the payload is less than 46 , a padding of zeroes is added till it fills
+
+example : a payload of 35 bytes needs 11 bytes of zeroes padding
+
+
+======================     learning Mac address based on ip address     =======================================================
+
+
+----------------------------------------- Network-----------------------------------------------------------------------
+
+
+  0C2F.B011.9D00                                                                   0C2F.B06A.3900
+
+        pc1 ------							        ------- pc3
+	.1	  \                        192.168.1.0/24                     /		.3
+		     switch1 ----------------------------------------- switch2
+	.2	  /							      \		.4
+	pc2 ------							        ------- pc4	
+	 
+  0C2F.B084.6200                                                                   0C2F.B01E.0A00
+
+
+
+
+each device has an ip address 
+
+task :
+send a frame from pc 1 to pc 3
+
+
+1/ the pc one only knows the ip address of the destination 
+
+so the message is like this 
+				src ip : 192.168.1.1
+				Dist ip :192.168.1.3
+				Src Mac: 0C2F.B011.9D00
+				Dist Mac: ????
+
+
+
+how does a Pc discover which Mac to send to only by it's ip address?
+
+		 we use the ARP protocol
+
+
+==========================================     ARP Protocol     ==================================================================
+
+
+ARP or (Address resolution Protocol) is the method a pc discovers the Macs with
+
+using the ARRP Request and Reply
+
+
+------------------------------------------    ARP Request   ----------------------------------------------------------------------------
+
+2/  we send the ARP Request which is a broadcast to all connected devices 
+and wait for a ARP Reply from the actual Destination
+
+
+to indicate the Broadcast we fill the Dist Mac with all FFFF   
+
+				src ip : 192.168.1.1
+				Dist ip :192.168.1.3
+				Src Mac: 0C2F.B011.9D00
+				Dist Mac: FFFF.FFFF.FFFF
+
+3/ when the switch 1 receives it he broadcast also, 
+and adds the new dynamic mac to its table if it's new
+
+		switch1 mac address
+		|  Mac  | Interface |
+		| .9D00 |    g0/0   |     
+
+4/ pc2 doesn't match the Mac so he drops the frame
+
+5 switch 2 broadcasts the frame ,and addes the dynamic Mac if it's new
+
+		switch2 mac address
+		|  Mac  | Interface |
+		| .9D00 |    g0/2   |     
+
+
+
+6/ pc4 drops the frame , and Pc3 accepts it because it matches it's ip address
+
+
+------------------------------------------    ARP Reply   ----------------------------------------------------------------------------
+
+
+1/ as a response the pc3 send this ARP reply
+
+				src ip : 192.168.1.3
+				Dist ip :192.168.1.1
+				Src Mac : 0C2F.B06A.3900
+				Dist Mac :0C2F.B011.9D00
+
+
+then forward it to switch 2
+
+2/ switch 2 addes the dynamic Mac to the Table if it's new
+
+		switch2 mac address
+		|  Mac  | Interface |
+		| .9D00 |    g0/2   |
+		| .3900 |    g0/0   |     
+
+and forward the message to switch one using the port g0/2 (Known unicast)
+
+
+3/ switch 1 addes the dynamic Mac to the Table if it's new
+
+		switch1 mac address
+		|  Mac  | Interface |
+		| .9D00 |    g0/0   | 
+		| .3900 |    g0/2   |     
+
+and forward the message directly pc1 via port g0/0 (Known unicast)
+
+
+4/ pc1 finnaly addes the new Dinamically learned Mac to it's ARP Table
+
+
+--------------------------------------------------------  ARP Table  ---------------------------------------------
+
+using arp -a on the pc it will show up the arp table
+
+    |  Internet address |    Mac address   |   Type   |
+    |     192.168.1.3   |  0C2F.B06A.3900  |  dynamic |
+    |     192.168.1.0   |  FFFF.FFFF.FFFF  |   static |
+    |       ........    |      ......      |   static |
+
+
+there is bunch of static adddreses that we ignore in this example
+
+
+
+on a switch we don't use arp -a  , instead we use this command to see the actual Mac Table
+
+
+	switch# show mac address-Table 
+
+
+    |  vlan |    Mac address   |   Type   | ports 
+    |   1   |  0C2F.B011.9D00  |  dynamic | gi0/0
+    |   1   |  0C2F.B06A.3900  |  dynamic | gi0/2
+
+------------------------------------Mac address removal------------------------------------------------
+
+-if the switch doesn't getany traffic from the device after 5 minutes he deletes the entry 
+
+the proccess is called      " aging " 
+
+
+- we can also manually remove mac addresses
+
+	switch# clear mac address-Table dynamic   (the - in between address-Table not mac-address)
+
+we add more options to be specific
+
+	switch# clear mac address-Table dynamic address 0C2F.B011.9D00
+
+or use a specific interface
+
+	switch# clear mac address-Table dynamic interface g0/0
+
+
+=====================================================   Ping    ======================================================   
+
+
+pinging a device is to send ICMp frames to it (usualy 4 or 5) of 100bytes , used to make sure of a successfull connection
+
+ping needs to be sent to a specific address , so ARP must be first to operate 
+
+
+	pc1# ping 192.168.1.3
+
+the pc sends an
+                     	" ICMP Echo Request "
+and waits for    
+			" ICMP Echo Reply "
+
+both messages are Known Unicast Frames
+
+==================================================   wireshark   ================================================================
+
+
+wireshark is a tool to analize trafic between devices ,to know type and content of frames and packets
+
+
+we try using it on the previous example 
+
+on the ARP request header frame we notice :
+
+distination :   FF.FF.FF.FF.FF.FF
+type:           ARP (0x0806)
+padding :  00000000000000000000000000000000000
+
+
+for the icmp ping (this time we used ping 192.168.1.3 size 32 bytes, just to see the padding)
+
+type: 		IPv4(0x0800)
+padding :0000000000
+
+
+
+remark: the 0s on wireshark are hexadecimal 0s
+
+
+#####################################	 Quiz	###################################
+
+
+
+## Q1 -  you send a 36-byte ping to another computer and perform a packet capture to analyze the network traffic 
+, you notice a long series of bytes of 00000000 at the end of the Ethernet payload , how can you explain these zeroes?
+
+1/ pings are series of zeroes
+2/ they are padding zeroes
+3/ they are the Ethernet FCS
+
+my answer is           they are padding zeroes 
+
+solution : ✅  the 00000000 is added after small sized packets to complete the 46 bytes 
+
+
+
+## Q2 - which of these messages is sent to all hosts on the local network?
+
+1/ ARP Request
+2/ ARP Reply
+3/ ICMP Echo Request
+4/ ICMP Echo Reply
+
+my answer is           1/ ARP Request
+
+solution : ✅  the dist feild in the ARP Request is FFFF.FFFF.FFFF as a broadcast address 
+all the rest are ,known unicast frames
+
+
+
+## Q3 -  which fields are present in the output of the show mac address-Table command on a Cisco switch?
+
+1/ Mac address , ports
+2/ vlan, Mac address , ports
+3/ vlan, Mac address , type , ports
+4/ internet address , physical address, type
+
+my answer is  3/ vlan, Mac address , type , ports         
+
+solution : ✅   example          |   1   |  0C2F.B011.9D00  |  dynamic | gi0/0 |
+
+
+
+## Q4 - which types of frames does a switch send out of all interfaces 
+ ,except the one the fame was received from?
+
+1/ broadcast , unKnown unicast
+2/ broadcast , Known unicast
+3/ Known unicast , unKnown unicast
+4/ broadcast , unKnown unicast, Known unicast
+
+my answer is    1/ broadcast , unKnown unicast      
+
+solution : ✅   knowncast is sent only to a single device specifically   
+
+
+
+
+## Q5 - which command is used on a cisco switch to clear all dynamic Mac adresses on a specific interface from the Mac address table?
+
+1/ clear mac address-table interface  interface-id
+2/ clear mac-address-table dynamic interface interface-id
+3/ clear mac-address table dynamic interface interface-id
+4/ clear mac address-table dynamic interface interface-id
+
+my answer is    3/ clear mac-address table dynamic interface interface-id     
+
+solution : ❌    4/ clear mac address-table dynamic interface interface-id
+
+the - is between address-table not between mac-address
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
