@@ -1,0 +1,379 @@
+
+to navigate in the internet the devices require an ip address
+
+the common type are IPv4 addresses
+
+
+			192.168.10.254 / 24
+
+	 	   192  .   168  .   10   .   254            decimal
+		11000000 10101000 00000001 11111110          binary
+
+the address is made in 4 feilds each of 8 bits	 
+
+			max number in a feild is 255
+
+----------------------------------  host / network ------------------------------------------------------------
+ 
+
+the /24 prefix indicates the bits reserved for the network part ,the rest is for the host
+
+example : 	11000000 10101000 00000001 11111110   /24
+		   192  .   168  .   10   .   254     /24
+
+		192.168.10  is the network part
+		
+	    	.254 is the number of the host
+
+
+example :	10011010 01001110 01101111 00100000   /16
+		   154  .   78  .   111   .   32      /16
+
+		154.78 is the Network 
+
+		.11.32 is the host portion
+
+
+example :       00001100 10000000 11111011 00010111    /8
+		   12   .   128  .   251  .   23       /8
+
+		12.128.251 is the Network 
+
+		.23 is the host portion
+ 
+==============================================  IPv4 classes ===========================================================================
+
+the IPs are separeated in 5 classes
+
+
+	| class | First octet | First decimal range | 
+
+	|   A   |   0xxxxxxx  |        0-127        |       	
+	|   B   |   10xxxxxx  |       128-191       |       	
+	|   C   |   110xxxxx  |       192-223       |        	
+	|   D   |   1110xxxx  |       224-239       |       	
+	|   E   |   1111xxxx  |       240-255       |       	
+
+
+the classes actually used are A, B and c
+
+class D is reserved for multicast adressing (Later Topic)
+
+class E is reserved for Expirimentall uses 
+
+------------------------------------------- 127.0.0.1 -------------------------------------------------------------
+
+in class A the 127 is never used in actual networks 
+
+		127.0.0.0 - 127.255.255.255
+
+127 is reserved for loopback (testing the osi stack on the local host)
+
+	ping 127.0.0.1 is sent to the same local host 
+
+
+	| class | First octet | First decimal range |  prefix lenght
+
+	|   A   |   0xxxxxxx  |        0-127        |    /8   	
+	|   B   |   10xxxxxx  |       128-191       |    /16    	
+	|   C   |   110xxxxx  |       192-223       |    /24
+
+
+	class A only uses /8 
+	class B only uses /16
+	class C only uses /24
+
+
+the previous examples we used :
+	
+	192.168.10.254 /24 	class c
+	154.78.111.32  /16      class B
+	12.128.251.23  /8	class A
+
+
+---------------------------------    class size     ---------------------------------------------------------------------------
+
+class A :  has only 7 bits for Network (8-1 of the 0)	(2⁷ networks = 128)
+	       and 24 bits for Hosts 			(2²⁴ hosts = 16777216)
+
+class B :  has 14 bits for Network (16-2 of the 10)	(2¹⁴ networks = 16384)
+	       and 16 bits for Hosts 			(2¹⁶ hosts = 65536)
+
+class C :  has 21 bits for Network (24-3 of the 110)	(2²¹ networks = 2097152)
+	       and 8 bits for Hosts 			(2⁸ hosts = 256)
+
+
+--------------------------------       Netmask      ------------------------------------------------------------------------------
+
+net maslk is just another way to write the Network portion 
+		by replacing it with all 1s 
+		and replacing the host portion with all 0s
+
+
+class A : /8         
+			11111111.00000000.00000000.00000000
+			  255   .    0   .    0   .    0
+
+class A : /16         
+			11111111.11111111.00000000.00000000
+			  255   .   255  .    0   .    0
+
+class A : /24         
+			11111111.11111111.11111111.00000000
+			  255   .   255  .   255  .    0
+
+
+=======================================  Network and Broadcast address   ==============================================================
+
+
+---------------------------------------------  Network address  ---------------------------------------------------------------
+
+when the host portion is all 0s it means it's the network address, an identifier for the network
+it can't be assigned to any host
+
+the first address usable is one address after the Network address
+
+			192.168.10.0 / 24 Network address
+			192.168.10.1 / 24 first usable address in the network
+
+
+---------------------------------------------  broadcast address  ---------------------------------------------------------------
+
+when the host portion is all 1s it means it's the Broadcast Address
+also can't be assigned to a host
+
+the last address usable is one address before the broadcast address
+
+			192.168.10.255 / 24 broadcast address
+			192.168.10.254 / 24 last usable address in the network
+
+
+broad cast is to send data to all hosts connected 
+
+				in the frame we use:
+
+				Dist ip :192.168.10.255
+				Dist MAC: FFFF.FFFF.FFFF
+
+
+
+
+
+#####################################	 Quiz	###################################
+
+
+
+## Q1 -  convert the following IPv4 address to dotted decimal notation?
+
+		00111111 00111000 11100111 00010011
+
+my answer is     63.56.207.35      
+
+solution :   ❌  63.56.231.19
+
+
+
+## Q2 -  convert the following IPv4 address to dotted decimal notation?
+
+		11110011 01111111 01100010 0000001
+
+my answer is     232.127.96.1      
+
+solution :   ❌  243.127.98.1
+
+
+
+## Q3 -  convert the following IPv4 address to dotted decimal notation?
+
+		01101111 00000110 01011001 11000111
+
+my answer is     95.6.89.199
+
+solution :  ❌  111.6.89.999
+  
+
+
+## Q4 -  convert the following IPv4 address to dotted decimal notation?
+
+		11001111 11000110 00101111 01001100
+
+my answer is     159.198.47.76    
+
+solution :   ❌  207.198.47.76
+
+
+
+## Q5 -  convert the following IPv4 address to dotted decimal notation?
+
+		01100100 11001001 00100001 11111101
+
+my answer is     100.201.33.253    
+
+solution :   ✅
+
+
+
+## Q6 -  convert the following IPv4 address to binary notation?
+
+		88.46.90.91
+
+my answer is    01011000.00101110.01011010.01011011
+
+solution :   ✅
+
+
+
+## Q7 -  convert the following IPv4 address to binary notation?
+
+		221.234.246.163
+
+my answer is    11011101.11101010.11110100.10011110
+
+solution :   ❌  11011101.11101010.11110110.10100011
+
+
+
+## Q8 -  convert the following IPv4 address to binary notation?
+
+		3.41.143.222
+
+my answer is    00000011.00101001.10001111.11011110
+
+solution :   ✅
+
+
+## Q9 -  convert the following IPv4 address to binary notation?
+
+		10.200.231.91
+
+my answer is    00001010.11001000.11100111.01100101
+
+solution :   ❌   00001010.11001000.11100111.01011011
+
+
+## Q10 -  convert the following IPv4 address to binary notation?
+
+		248.87.255.152
+
+my answer is    11111000.01010111.11111111.10011000
+
+solution :   ✅
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
