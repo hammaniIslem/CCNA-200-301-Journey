@@ -1,0 +1,282 @@
+
+we saw before that class A has a renge of IPs starting from
+			
+				0  to  127
+
+but actually both 0 and 127 are reserved , which leaves classA with a range of 
+
+				1  to  126
+
+
+===========================================     maximum hosts on a Network     ===========================================================
+
+-------------------------------------------     class c   --------------------------------------------------------------------------------
+
+
+example :  192.168.1.0/24   the host portion is 8
+
+		2⁸ = 256
+
+    but we discussesd earlier that the first address is an indicator for the Network 
+
+				192.168.1.0
+
+    and the last one is an id=ndicator for the broadcast 
+
+				192.168.1.255
+
+    that gets us :  
+
+		2⁸ - 2  = 254
+
+    all class c networks has 254 hosts
+
+
+the first address usable is the one after the Network address  :   192.168.1.1/24
+
+the last address usable is the one before the broadcast address : 192.168.1.254/24
+
+-------------------------------------------     class B   --------------------------------------------------------------------------------
+
+
+example :  172.16.0.0/16   the host portion is 16
+
+		2¹⁶ - 2 = 65534
+
+    all class B networks has 65534 hosts
+
+
+
+the first address usable is the one after the Network address  :   172.16.0.1/16
+
+the last address usable is the one before the broadcast address : 172.16.255.254/16
+
+-------------------------------------------     class A   --------------------------------------------------------------------------------
+
+
+example :  10.0.0.0/8   the host portion is 24
+
+		2²⁴ - 2 = 16777214
+
+    all class A networks has 16777214  hosts
+
+
+the first address usable is the one after the Network address  :   10.0.0.1/8
+
+the last address usable is the one before the broadcast address : 10.255.255.254/8
+
+
+
+
+==============================================   Network topology  ====================================================================================
+
+			
+		     10.0.0.0/8      g0/1          g0/0     192.168.0.0/24
+                                       .254     .254
+	pc  ---------  switch1  ---------  router  ---------  switch2  ---------  pc
+     .1                                    .254                                   .1
+					    |      g0/2
+					    |
+					    |
+                                       172.16.0.0/16
+					  switch3  ---------  pc
+                                                               .1
+
+---------------------------------   Router interface configuration   ----------------------------------------------------------------------------
+
+to show the current interfaces info we use :
+
+			router# show ip interface brief
+
+
+    Interface 		 IP-ADDRESS  	OK? 	Method 	   Status 		   Protocol
+    GigabitEthernet0/0   unassigned     YES     unset      administratively down   down
+    GigabitEthernet0/1   unassigned     YES     unset      administratively down   down
+    GigabitEthernet0/2   unassigned     YES     unset      administratively down   down
+    GigabitEthernet0/3   unassigned     YES     unset      administratively down   down
+
+
+OK? feilsd is a Legacy feature to make sure the ip address is valide or not
+modern devices don't allow invalid IPs to be assigned at all ,so it's always YES
+
+Method feild is to identify whether the ip was set -Manual- or was obtained via a -DHCP- server
+,
+status is the default state of the port 
+status is for the Layer 1 ,to see if the device is physically connected
+the router's ports are by default -administativaly down- and must use               router(config -if)# no shutdown
+the switch's ports are by default -administativaly up-
+
+protocol feild indicateds if the port is functionnally down or up
+
+a port status can be up while the protocol is down
+
+
+-----------------------------------------   configure an interface   ----------------------------------------------------------------
+
+to enter a port from the CLI 
+
+	Router(config)# interface gigabitethernet 0/0
+	Router(config-if)#   
+
+to manually add an ip address to an interface 
+
+	Router(config-if)# ip address 192.168.0.254 255.255.255.0
+
+to keep the port up we use
+
+	Router(config-if)# no shutdown
+
+
+lets try and check the port new state from here 
+
+	Router(config-if)# do show ip interface breif
+
+	
+   Interface 	        IP-ADDRESS  	 OK?    Method     Status 		   Protocol
+   GigabitEthernet0/0   192.168.0.254    YES    Manual     Up                      Up
+   GigabitEthernet0/1   unassigned       YES    unset      administratively down   down
+   GigabitEthernet0/2   unassigned       YES    unset      administratively down   down
+   GigabitEthernet0/3   unassigned       YES    unset      administratively down   down
+
+
+now we do the same for the other interface
+	
+		Router(config-if)# interface g0/1
+		Router(config-if)# ip address 10.255.255.254 255.0.0.0
+		Router(config-if)# no shutdown
+		Router(config-if)# interface g0/2
+		Router(config-if)# ip address 172.16.255.254 255.255.0.0
+		Router(config-if)# no shutdown
+
+		Router(config-if)# do show ip interface brief
+
+	
+   Interface 	        IP-ADDRESS  	 OK?    Method     Status 		   Protocol
+   GigabitEthernet0/0   192.168.0.254    YES    Manual     Up                      Up
+   GigabitEthernet0/1   10.255.255.254   YES    Manual     Up                      Up
+   GigabitEthernet0/2   172.16.255.254   YES    Manual     Up                      Up
+   GigabitEthernet0/3   unassigned       YES    unset      administratively down   down
+
+
+-----------------------------------------   show interfaces physical info   ----------------------------------------------------------------
+
+
+to show hardware thechnical info about the interface we use :
+
+	router# show interfaces 
+
+we get a very long message about all interfaces 
+
+we can select one interface by using it's name 
+
+	router# show interfaces g0/0
+
+-----------------------------------------   interface description   ----------------------------------------------------------------
+
+router# show interfaces description 
+
+we get :
+
+		Interface    Status        Protocol   Descripion
+		G0/0         up            up        
+		G0/1         up            up        
+		G0/2         up            up        
+		G0/3         admin down    down            
+
+the discription is an optional tex twe can add
+
+example :   	
+			
+			Router(config)# interface g0/0  
+			Router(config-if)# description ## connected to switch 2 ##
+
+			Router(config-if)# do show interfaces description 
+
+
+		Interface    Status        Protocol   Descripion
+		G0/0         up            up         ## connected to switch 2 ##
+		G0/1         up            up        
+		G0/2         up            up        
+		G0/3         admin down    down            
+
+
+
+#####################################	 Quiz	###################################
+
+for each Network find :
+
+	Network address 
+	Maximum number of hosts 
+	Network Broadcast address
+	First usable address
+	last usable address
+
+## Q1 - pc1 has an IP address of 43.109.23.12/8 ?
+
+my answer is 
+
+43.0.0.0/8  
+16777214
+43.255.255.255
+43.0.0.1
+43.255.255.254         
+
+solution : ✅  
+
+
+## Q2 - 129.221.23.13/16 ?
+
+my answer is           
+
+129.221.0.0/16
+65534
+129.221.255.255
+129.221.0.1
+129.221.255.254
+
+solution : ✅  
+
+
+
+## Q3 -  209.211.3.22/24 ?
+
+my answer is           
+
+209.211.3.0/24
+254
+209.211.3.255
+209.211.3.1
+209.211.3.254
+
+solution : ✅   
+
+
+
+## Q4 - 2.71.209.233/8 ?
+
+my answer is   
+
+2.0.0.0/8
+16777214
+2.255.255.255
+2.0.0.1
+2.255.255.254        
+
+solution : ✅  
+
+
+
+
+## Q5 - 155.200.201.141/16 ?
+
+my answer is   
+
+155.200.0.0/16
+65534
+155.200.255.255
+155.200.0.1
+155.200.255.254      
+
+solution : ✅   
+
+
