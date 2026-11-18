@@ -1,0 +1,268 @@
+Routing is the proccess to forward the iP Packets to their Proper Destination 
+
+just like Switches using the - MAC address-table - to do the Switching
+
+Routers use - Routing Table - to find the best Route
+ 
+there are two Main Methods to Learn a Route:
+
+	1/ Static Routing
+
+by manually adding the Route to the Table 
+
+	2/ Dynamic Routing
+
+by using one of th Routing Protocol to Detect new Routes (OSPF,RIP,EIGRP..)
+
+
+====================================      Routing Table     ==============================================================
+
+how does a Routing Table operate ?
+
+When Receivig a packet , the Router searches for a match in the Table
+
+and chooses between the three options 
+	
+	1/ Forwarding the Packet to the Route he found to the next hop
+	2/ accept and decapsulate the Packet if the Destination is his own
+	3/ drop the Packet if there are no Matches
+
+if there are no matches the Router never Floods the packet
+
+-----------------------------------       Network     ---------------------------------------------------------------------------------
+
+		192.168.1.0/24
+	.10                    .1   .1             .3 
+	Pc1 ---------Sw1----------R1------------------R3
+			       .1 |	.13.0/24      | .3
+				  |		      |
+			.12.0/24  |		      | .34.0/24
+				  |		      |
+			       .2 |	.23.0/24      | .4                   .20
+		        	  R2------------------R4--------Sw2---------Pc2
+			             .2             .4
+								192.168.2.0/24
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+in this part we will focus only on R1 and it's Table
+
+	192.168.1.0/24	     g0/2    g0/0
+	.10                    .1   .1     192.168.13.0/24         
+	Pc1 ---------Sw1----------R1-------
+			   g0/1 .1|       
+				  |  19.168.12.0/24
+
+
+
+first we Cofigure the Interfaces
+
+	R1(Config)# interface g0/0
+	R1(Config-if)# ip address 192.168.13.1 255.255.255.0
+	R1(Config-if)# no shutdown 
+
+	R1(Config-if)# interface g0/1
+	R1(Config-if)# ip address 192.168.12.1 255.255.255.0
+	R1(Config-if)# no shutdown 
+
+	R1(Config-if)# interface g0/2
+	R1(Config-if)# ip address 192.168.1.1 255.255.255.0
+	R1(Config-if)# no shutdown 
+
+	
+====================================      Routing Table     =============================================================
+	
+to show the Routing Table on a Router we use 
+	
+	R1# show ip route
+
+
+codes : L - local, C - connected, S - static, R - RIP, M - Mobile, B - BGP
+       	D - EIGRP , EX - EIGRP external , O - OSPF , IA - OSPF inter area
+	N1 - OSPF NSSA external type1, N2 - OSPF NSSA external type2
+	E1 - OSPF external type1, E2 - OSPF external type2
+	i - IS-IS inter area ,* - candidate default, U - per-user static route
+	o - ODR, P - Periodic downloaded static route, H - NHRP , l-Lisp
+	a - application route
+	+ - replicated route, % - next hop override, P-overrides from PfR
+
+Gateway of last resort is not set 
+
+	192.168.1.0/24 is variably subnetted, 2 subnets, 2 masks
+C  		192.168.1.0/24 is directly connected GigabitEthernet0/2
+L  		192.168.1.1/32 is directly connected GigabitEthernet0/2
+	192.168.12.0/24 is variably subnetted, 2 subnets, 2 masks
+C  		192.168.12.0/24 is directly connected GigabitEthernet0/1
+L  		192.168.12.1/32 is directly connected GigabitEthernet0/1
+	192.168.13.0/24 is variably subnetted, 2 subnets, 2 masks
+C  		192.168.13.0/24 is directly connected GigabitEthernet0/0
+L  		192.168.13.1/32 is directly connected GigabitEthernet0/0
+
+---------------------------------------------------------------------------------------------------------------------------------------
+
+the codes represent an Explanation on the Letter on the Left
+
+
+here we see Two routes for each IP we added to the interface 
+
+C  means that the whole Network is accesible through that Port
+ 
+L  is a /32 , pointing to the interface itself , so when the Destination matches that route 
+the packet gets sent to the interface which is the same Router ,so he accepts the packet 
+
+
+
+- actually when the Destination is /32 , it also matches the C routes because it's a part of the same Network
+but the Router Chooses the most specific route Possible 
+
+192.168.1.0/24  --> 256  could match (from 0 to 255)
+192.168.1.1/32  --> only the interface 
+
+most specific = longst Prefix length 
+
+
+---------------------------------------    Practice examples   --------------------------------------------------------------------------------
+
+1/ port 0/2 gets a packet with Dist-ip: 192.168.1.1
+which route would R1 choose and how many matches?
+
+answer:	two matches
+
+C  		192.168.1.0/24 is directly connected GigabitEthernet0/2
+L  		192.168.1.1/32 is directly connected GigabitEthernet0/2
+
+R1 chooses the most specific L- 192.168.1.1/32
+and R1 receives the Packet
+---
+
+2/ port 0/2 gets a packet with Dist-ip: 192.168.13.3
+which route would R1 choose and how many matches?
+
+answer:	one match
+C  		192.168.13.0/24 is directly connected GigabitEthernet0/0
+
+---
+
+3/ port 0/1 gets a packet with Dist-ip: 192.168.1.244
+which route would R1 choose and how many matches?
+
+answer:	one match
+C  		192.168.1.0/24 is directly connected GigabitEthernet0/2
+
+---
+
+4/ port 0/0 gets a packet with Dist-ip: 192.168.12.1
+which route would R1 choose and how many matches?
+
+answer:	two matches
+
+C  		192.168.12.0/24 is directly connected GigabitEthernet0/1
+L  		192.168.12.1/32 is directly connected GigabitEthernet0/1
+
+R1 chooses the most specific L- 192.168.12.1/32
+and R1 receives the Packet
+
+---
+
+5/ port 0/2 gets a packet with Dist-ip: 192.168.4.10
+which route would R1 choose and how many matches?
+
+no matches found 
+the Packet gets dropped
+ 
+
+
+#####################################	 Quiz	###################################
+
+
+
+## Q1 - the IP address configured on a router interface will appear in the routing table as what kind of route ?
+
+1/ static 
+2/ connected
+3/ Local
+4/ Dynamic
+
+my answer is      3/ Local          
+
+solution : ✅   L -   /32 
+
+
+
+## Q2 - examine this Router's Routing Table 
+, what will it do when it receives a packet destined for 192.168.3.25 ?
+
+	192.168.1.0/24 is variably subnetted, 2 subnets, 2 masks
+C  		192.168.1.0/24 is directly connected GigabitEthernet0/0
+L  		192.168.1.1/32 is directly connected GigabitEthernet0/0
+	192.168.2.0/24 is variably subnetted, 2 subnets, 2 masks
+C  		192.168.2.0/24 is directly connected GigabitEthernet0/1
+L  		192.168.2.1/32 is directly connected GigabitEthernet0/1
+	192.168.3.0/24 is variably subnetted, 2 subnets, 2 masks
+C  		192.168.3.0/24 is directly connected GigabitEthernet0/2
+L  		192.168.3.25/32 is directly connected GigabitEthernet0/2
+
+
+1/ it will drop the packet 
+2/ it will receive the packet for itself 
+3/ it will forward the packet out of the g0/0 interface
+4/ it will forward the packet out of the g0/2 interface
+
+my answer is      4/ it will forward the packet out of the g0/2 interface     
+
+solution : ❌    2/ it will receive the packet for itself 
+192.168.3.25 is the actual ip for the interface
+
+
+
+## Q3 - which of the following statements about the behavior of the routers and switches are true ?
+
+1/ Routers floodd packets with an UnKnown destination
+2/ Switches flood Frames with an UnKnown destination
+3/ Routers drop packets with an UnKnown destination
+4/ Switches drop Framess with an UnKnown destination
+
+my answer is    2/ Switches flood Frames with an UnKnown destination
+		3/ Routers drop packets with an UnKnown destination       
+
+solution : ✅   
+
+
+
+## Q4 - which two types of routes are automatically added to the routing table
+ when you configure an ip address on an interface and enable it?
+
+1/ C, L 
+2/ C, S
+3/ L, S
+4/ L, D
+
+my answer is    1/ C, L        
+
+solution : ✅  
+
+
+
+
+## Q5 - examine this Router's Routing Table 
+, what will it do when it receives a packet destined for 10.0.1.23 ?
+
+	10.0.0.0/24 is variably subnetted, 2 subnets, 2 masks
+C  		10.0.0.0/24 is directly connected GigabitEthernet0/0
+L  		10.0.0.1/32 is directly connected GigabitEthernet0/0
+	10.0.2.0/24 is variably subnetted, 2 subnets, 2 masks
+C  		10.0.2.0/24 is directly connected GigabitEthernet0/1
+L  		10.0.2.23/32 is directly connected GigabitEthernet0/1
+	10.0.1.0/24 is variably subnetted, 2 subnets, 2 masks
+C  		10.0.1.0/24 is directly connected GigabitEthernet0/2
+L  		10.0.1.23/32 is directly connected GigabitEthernet0/2
+
+1/ one matching route : 10.0.1.0/24
+2/ one matching route : 10.0.1.23/32
+3/ two matching routes : 10.0.1.0/24, 10.0.1.23/32 most specific : 10.0.1.23/32
+4/ two matching routes : 10.0.1.0/24, 10.0.1.23/32 most specific : 10.0.1.0/24
+
+my answer is         3/ two matching routes : 10.0.1.0/24, 10.0.1.23/32 most specific : 10.0.1.23/32
+
+solution : ✅   
+
