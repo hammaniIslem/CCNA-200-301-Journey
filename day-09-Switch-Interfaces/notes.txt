@@ -1,0 +1,432 @@
+
+============================   Switch interfaces Configuration   ============================================================
+
+
+switches usualy has 24 RJ-45 ports , yet there are some with 48
+
+like : Catalyst 9200switch
+
+and some even have few SFPs for fiber optic cables ,to connect to Routers
+
+
+-----------------------------------    show    ----------------------------------------------------------------------
+
+just like a Router we use :
+
+		Switch# show ip interface brief
+
+    |    interface   | IP-Address | OK? | Method | Status | Protocol |
+    |      Vlan      | unassigned | Yes | unset  |   up   |    up    |
+    | FastEthrnet0/1 | unassigned | Yes | unset  |   up   |    up    |
+    | FastEthrnet0/2 | unassigned | Yes | unset  |   up   |    up    |
+    | FastEthrnet0/3 | unassigned | Yes | unset  |   up   |    up    |
+    | FastEthrnet0/4 | unassigned | Yes | unset  |   up   |    up    |
+    | FastEthrnet0/5 | unassigned | Yes | unset  |  down  |   down   |
+    | FastEthrnet0/6 | unassigned | Yes | unset  |  down  |   down   |
+    | FastEthrnet0/7 | unassigned | Yes | unset  |  down  |   down   |
+    | FastEthrnet0/8 | unassigned | Yes | unset  |  down  |   down   |
+    | FastEthrnet0/9 | unassigned | Yes | unset  |  down  |   down   |
+        			    .
+				    .
+				    .
+				    .
+				    .
+
+status Field on the switch is down by default when no cable is physically connected 
+unlike the router's interfaces that are "administrativaly down"
+ 
+
+
+---------------------------------   Status  --------------------------------------------------------------------------------
+
+  to see more information about the interfaces we use 
+
+		Switch# show interface status
+
+	|  port  |  Name  |     Status     |  Vlan |  Duplex  |  Speed  |     Type     |
+	|  Fa0/1 |        |     connected  |   1   |  a-full  |  a-100  | 10/100BaseTx |
+	|  Fa0/2 |        |     connected  | trunk |  a-full  |  a-100  | 10/100BaseTx |
+	|  Fa0/3 |        |     connected  |   1   |  a-full  |  a-100  | 10/100BaseTx |
+	|  Fa0/4 |        |     connected  |   1   |  a-full  |  a-100  | 10/100BaseTx |
+	|  Fa0/5 |        |  notconnected  |   1   |   auto   |   auto  | 10/100BaseTx |
+	|  Fa0/6 |        |  notconnected  |   1   |   auto   |   auto  | 10/100BaseTx |
+	|  Fa0/7 |        |  notconnected  |   1   |   auto   |   auto  | 10/100BaseTx |
+	|  Fa0/8 |        |  notconnected  |   1   |   auto   |   auto  | 10/100BaseTx |
+				               .
+				               .
+				               .
+				               .
+
+
+Name feild is the same as description 
+
+Vlan feild will be explained in an other video (trunk meaning included)
+
+duplex is for the way the switches send data(half , full aor auto)
+half duplex means only one device can send ata time 
+full duplex means both can send at the same time 
+auto means the switch will negotiate with the neighbor device and choose between half and full
+the defaut is auto , changes to a-full or a-half after negotiation
+ 
+speed is corresponding to the BASE-T
+for example 10/100/1000BAse-T will have these options :
+either 10 , 100, 1000 or auto 
+auto means the switch will negotiate with the neighbor device and choose the appropriate speed for both devices
+changes to a-10, a-100, a-1000 after negotiation
+
+-------------------------------------      manual   ------------------------------------------------------------------------
+
+lets see what options we have for the Duplex (we are in 10/100Base-Tx)
+		
+		Switch(config)#interface F0/1
+		Switch(config-if)# duplex ?
+		
+		auto		enable AUTO duplex Configuration
+		full		Force full duplex operation	
+		half		Force half-duplex operation	
+
+		Switch(config-if)# duplex full
+
+
+now lets see what options we have for the speed ?
+
+		Switch(config-if)# speed ?		
+		10		Force 10Mbps operation	
+		100		Force 100Mbps operation	
+		auto 		enable AUTo speed Configuration
+
+		Switch(config-if)# speed 100
+
+and lets add a Description 
+
+		Switch(config-if)# description ## to R1 ##
+
+
+
+
+lets see the status again
+
+		Switch# show interface status
+			          
+    |  port  |      Name     |     Status     |  Vlan |  Duplex  |  Speed  |     Type     |
+    |  Fa0/1 |  ## to R1 ##  |     connected  |   1   |    full  |    100  | 10/100BaseTx |
+    |  Fa0/2 |               |     connected  | trunk |  a-full  |  a-100  | 10/100BaseTx |
+    |  Fa0/3 |               |     connected  |   1   |  a-full  |  a-100  | 10/100BaseTx |
+    |  Fa0/4 |               |     connected  |   1   |  a-full  |  a-100  | 10/100BaseTx |
+    |  Fa0/5 |               |  notconnected  |   1   |   auto   |   auto  | 10/100BaseTx |
+    |  Fa0/6 |               |  notconnected  |   1   |   auto   |   auto  | 10/100BaseTx |
+    |  Fa0/7 |               |  notconnected  |   1   |   auto   |   auto  | 10/100BaseTx |
+    |  Fa0/8 |               |  notconnected  |   1   |   auto   |   auto  | 10/100BaseTx |
+				                      .
+				                      .
+				                      .
+				                      
+				            
+we see the changes on the interface 1
+
+
+==========================================   port Security   ====================================================================================
+
+keeping unused interfaces enabled  is a security Concern , any one can connect to the Network by Simply plugging a Cable 
+
+we can access multiple interfaces and disable all of them all at once 
+	using the  - range - command
+
+
+		Switch(config)# interface range F0/5 - 24
+
+		Switch(config-if-range)# shutdown
+		Switch(config-if-range)# description ## not in use ##
+
+and the brief status will change to - administrativaly down -
+and in show status will change to disabled
+
+			          
+	|  port  |       Name       |    Status    |  Vlan |  Duplex  |  Speed  |     Type     |
+	|  Fa0/1 |   ## to R1 ##    |   connected  |   1   |    full  |    100  | 10/100BaseTx |
+	|  Fa0/2 |                  |   connected  | trunk |  a-full  |  a-100  | 10/100BaseTx |
+	|  Fa0/3 |                  |   connected  |   1   |  a-full  |  a-100  | 10/100BaseTx |
+	|  Fa0/4 |                  |   connected  |   1   |  a-full  |  a-100  | 10/100BaseTx |
+	|  Fa0/5 | ## not in use ## |    disabled  |   1   |   auto   |   auto  | 10/100BaseTx |
+	|  Fa0/6 | ## not in use ## |    disabled  |   1   |   auto   |   auto  | 10/100BaseTx |
+	|  Fa0/7 | ## not in use ## |    disabled  |   1   |   auto   |   auto  | 10/100BaseTx |
+	|  Fa0/8 | ## not in use ## |    disabled  |   1   |   auto   |   auto  | 10/100BaseTx |
+				                       .
+				                       .
+				                       .
+
+
+========================================   Half Duplex and Full Duplex   ===============================================================
+
+Half Duplex is the ability to send data only in one direction at a time which means the other device has to wait
+
+Full Duplex is the ability to send data both ways at the same time 
+
+
+logically Full duplex is the best option
+
+but where would half duplex be used?
+
+
+========================================     Hubs     ==========================================================================
+
+
+the hub is an old technology used befote the switch , with the same purpose 
+, connecting end hosts to the same domain
+ 
+hubs are known to be dumb devices ,because he doesn't use Mac addresses to send data
+instead they broadcast the message to all devices ,only operating at the Layer 1
+
+ 
+---------------------------------------    Collision    ------------------------------------------------------------------------------
+	
+	 __________________________________________________________________________
+	|                                                                          |
+	|   Collision Domain                                                       |
+	|                                                                          |
+	|                                                                          |
+	|	pc1   ---------------------  Hub -------------------- Pc2          |
+	|				      |                                    |
+	|				      |                                    |
+	|				      |                                    |
+	|				     pc3                                   |
+	|__________________________________________________________________________|
+	
+
+if pc1 and Pc2  want to send a message at the same time ,the send their messages normally on the port connected to the hub 
+but a problem occures when the hub floods it (pc1's message and Pc2's message both going to pc3 at the same time)
+we call that a collision
+
+because the message is ment to be sent to all devices Connected to the hub in the Same Domain
+we call it a Collision Domain
+
+
+
+ethernet devices use what's called:
+  
+			CSMA/CD (Carrier Sense Multiple Access with Collision Detection) 
+
+before Sending frames, devices listen to the Collition Domain to detect if other devices are sending messages 
+if a collision occurs the device send a jamming signal to inform othe devices that a collision happened 
+then each device has to wait a random time before it can listen again
+
+
+---------------------------------------    Switches    ------------------------------------------------------------------------------
+
+
+	 __________________________________________________________________________
+	|                                                                          |
+	|   Broadcast Domain                                                       |
+	|                                                                          |
+	|                collision domain             collision domain             |
+	|	pc1   --------------------- switch  -------------------- Pc2       |
+	|				      |                                    |
+	|				      |  collision Domain                  |
+	|				      |                                    |
+	|				     pc3                                   |
+	|__________________________________________________________________________|
+
+
+Switches use Mac Addresses to send data to a speciffic address 
+, also they never try to send two Frames at the same time 
+
+	one device + one packet = no collision 
+
+this one device connected to the switch is their own Collision Domain
+
+and because of that devices now can finally reach the full Duplex transmission
+
+
+
+
+=====================================   autonegotiation   =======================================================================
+
+
+autonegotiation is used by the switch or the Router and end devices to negotiate the best performance possible to transmit data (speed and duplex)
+
+a switch taht runs on 10/100/1000 and have speed auto and Duplex auto ,connected to three PCs
+each with a different cable
+
+		--- the end host also have autonegotiation enabled ---
+	   
+      
+		   Ethernet                             Fast
+	   pc1   --------------------- switch  -------------------- Pc2       
+					 |                                    
+					 |  
+					 | Gigabit                                   
+				        pc3   
+ 
+the Switch will Communicate with the best stats possible
+
+      
+        auto	   Ethernet             auto           	 Fast		auto	
+	   pc1   --------------------- switch  -------------------- Pc2       
+	spd:10 				 |                          spd:100          
+	Dpx:Full			 |  			    Dpx:Full
+					 | Gigabit                                   
+				auto    pc3   
+ 				      spd:1000
+				      Dpx:Full
+
+
+---------------------------------  autonegotiation off on one end  ------------------------------
+
+if the autonegotiation is the disabled in the other end 
+
+ the switch will try to sense the speed the other device operate on 
+ if it fails it choosesthe slowest speed (10 in this case)
+
+ if the speed is 10 or 100 ,the switch will choose Half-Duplex
+ if the speed is 1000 or greater ,the switch will choose full Duplex
+ 
+
+        manual	                        auto           	 	      manual	
+	   pc1   --------------------- switch  -------------------- Pc2       
+	spd:10 				 |                          spd:1000          
+	Dpx:half			 |  			    Dpx:Full
+					 |                                  
+		               manual   pc3   
+ 				      spd:100
+				      Dpx:Full
+
+
+the switch detect the speed  
+
+
+			spd:10                         spd:1000 
+        manual	        Dpx:Half        auto           Dpx:full    manual	
+	   pc1   --------------------- switch  -------------------- Pc2       
+	spd:10 				 |                          spd:1000          
+	Dpx:half		spd:100	 |  			    Dpx:Full
+				Dpx:half | 
+                                         |
+		               manual   pc3   
+ 				      spd:100
+				      Dpx:Full
+
+
+all he PCs have manually configured speed and Duplex
+when the switch try to give PC2 half duplex(because of the 100) while it has Full duplex
+, a collision occurs (caused by Duplex mismatch)
+
+========================================  interface Errors   ===============================================================
+
+we already seen the command	
+			
+			Switch#show interfaces 
+
+here are the meaning of some labels on the output
+
+- packet input , bytes : 
+counts how many packets passed by the device , and their size in bytes
+
+- runts : frame that re less than the minimum size 64byte
+
+- giants : frame that re less than the maximum size 1518byte
+
+-cRc :frames that failed the crc check(in FCS frame Triler)
+
+-Frame : frames that had inncorrect format(due to an error)
+
+-input error : Total of various errors , counting the four before
+
+-output error :frames the switch tried to send and failed due to an error
+
+
+
+these labels are the same on a router
+
+
+
+#####################################	 Quiz	###################################
+
+
+
+## Q1 -  there is a duplex mismatch beetween SW1 f0/0 and SW2 f0/0 
+, which are connected , autonegotiation is diabled ,what will be the result ?
+
+1/ a improved performance 
+2/ collisions will occur
+3/ SW1 will sense SW2's Duplex Setting and adjust to match
+
+my answer is        2/ collisions will occur     
+
+solution : ✅  
+
+
+
+## Q2 - what is used on half-duplex interfaces to detect and avoid collission?
+
+1/ CSMA/CD
+2/ CSMA/CA
+3/ autonegotiation
+4/ Duplex auto
+
+my answer is     1/ CSMA/CD      
+
+solution : ✅  
+
+
+
+## Q3 - which command show various counters of errors detected on an interface ?
+
+1/ show interfaces  
+2/ show ip interface brief
+3/ show interfaces status
+4/ show interfaces error
+
+my answer is          1/show interfaces 
+
+solution : ✅   
+
+
+
+## Q4 - which are examples of errors that might occur on a network interface?
+
+1/ Runts, Giants, Broadcasts
+2/ shorts, Longs Oversizes
+3/ Packets , Bytes, Inputs, outputs
+4/ Runts, Giants, CRC
+
+my answer is       4/ Runts, Giants, CRC    
+
+solution : ✅  
+
+
+
+
+## Q5 - SW1 is trying to autonegotiate interface speed Setting with SW2 
+, however autonegotiation is disabled on SW2 interface SW2 interface is configured with a speed of 100 Mbps and full duplex
+, what speed and Duplex Setting will SW1 use assuming it succeeds in sensing th speed?
+
+1/ speed 100 Mbps and full duplex
+2/ speed 100 Mbps and half duplex
+3/ speed 10 Mbps and full duplex
+4/ speed 10 Mbps and half duplex
+
+my answer is    2/ speed 100 Mbps and half duplex     
+
+solution : ✅   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
