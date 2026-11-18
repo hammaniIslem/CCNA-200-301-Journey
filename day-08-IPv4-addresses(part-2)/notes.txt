@@ -96,17 +96,19 @@ to show the current interfaces info we use :
     GigabitEthernet0/3   unassigned     YES     unset      administratively down   down
 
 
-OK? feilsd is a Legacy feature to make sure the ip address is valide or not
-modern devices don't allow invalid IPs to be assigned at all ,so it's always YES
+the - OK? - feild is a Legacy feature to make sure the ip address is valide or not
+modern devices don't allow invalid IPs to be assigned at all , so it's always YES
 
-Method feild is to identify whether the ip was set -Manual- or was obtained via a -DHCP- server
-,
-status is the default state of the port 
-status is for the Layer 1 ,to see if the device is physically connected
+- Method -  feild is to identify whether the ip was set -Manual- or was obtained via a -DHCP- server
+
+ - status -  is the default state of the port 
+status is for the Layer 1 , to see if the device is physically connected
+
 the router's ports are by default -administativaly down- and must use               router(config -if)# no shutdown
-the switch's ports are by default -administativaly up-
 
-protocol feild indicateds if the port is functionnally down or up
+the switch's ports are -down- by default and change automatically to up when aa cable is connected
+
+- protocol - feild indicates if the port is functionnally down or up
 
 a port status can be up while the protocol is down
 
