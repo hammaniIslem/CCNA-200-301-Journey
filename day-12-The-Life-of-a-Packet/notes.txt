@@ -1,0 +1,338 @@
+we saw before the procces a packet  pass through to reach it's destination 
+
+like :encapsulation , decapsulation , ARP ...
+
+so we will discuss the whole process again , step by step with more details using the same Network as before
+
+and the same static path assuming no MAC addresses are Known
+
+Pc1 -> R1 -> R3 -> R4 -> Pc4
+
+
+
+--------------------------------    Router Mac   ----------------------------------------------------
+
+Routers have different Mac Addresses on each Interface that he uses to Route between them 
+
+-----------------------------------------------------------------------------------------------------
+
+
+		192.168.1.0/24
+		
+	.1111               .AAAA   .BBBB              .CCCC 
+	Pc1 ---------Sw1----------R1------------------R3
+	.10		          |	.13.0/24      | .DDDD
+				  |		      |
+			.12.0/24  |		      | .34.0/24
+				  |		      |
+			          |	.23.0/24      | .EEEE                  .10
+		        	  R2------------------R4--------Sw2---------Pc4
+			                                 .FFFE             .4444
+								
+
+									 192.168.2.0/24
+
+we only used the last 4 charachters of the Mac 
+
+.FFFF is reserved for Broadcast , so the last is .FFFE
+
+
+
+==============================     ICMP ECHO REQUEST   ============================================================================
+
+
+------------------------------  pc1  to  Gateway   ----------------------------------------------------------------------------
+
+
+1/ the first packet we have is :  (ICMP Echo Request)
+
+				Src ip  : 192.168.1.10   <--- pc1
+				Dist ip : 192.168.4.10   <--- pc4
+				
+
+First step that happens is to check the Distination IP 
+, since it's a Different Network we send it to the default gateway (pre configured)
+, but we don't know it's Mac
+
+so we use ARP to find the Gateway 
+
+
+2/ the Arp Request 
+
+				Src ip  : 192.168.1.10
+				Dist ip : 192.168.1.254    <----  gateway ip 
+				Dist    : .FFFF            <----  Broadcast
+				Src     : .1111            
+
+
+3/ the ARP Request gets broadcasted to all devices in the Network
+reaching the Gateway , where he replies with a unicast Arp Reply publishing his MAC 
+
+
+				Src ip  : 192.168.1.254
+				Dist ip : 192.168.1.1
+				Dist    : .1111
+				Src     : .AAAA            <----  gateway MAc
+ 
+
+4/ now we know the gateway , we send the Unicast ICMP ECHO Request to it
+
+
+				Src ip  : 192.168.1.10
+				Dist ip : 192.168.4.10
+			        Dist    : .AAAA            
+				Src     : .1111            
+
+
+
+------------------------------    R1  to  R3   ----------------------------------------------------------------------------
+
+
+1/ for 192.168.4.10 , R1 checks the Routing Table and gets a Match with the Static Route we Configured
+
+	S             192.168.4.0/24 [1/0] via 192.168.13.3 
+
+
+R1 doesn't Know the MAC address of the Next hop 192.168.13.3 so he sends an ARP Request 
+
+
+2/ the ARP Request 
+
+				Src ip  : 192.168.13.1     <---- next hop connected IP
+				Dist ip : 192.168.13.3     <----  next hop ip 
+				Dist    : .FFFF            <----  Broadcast
+				Src     : .BBBB            <---- next hop connected MAC
+
+
+
+3/ R3 Receives the Broadcast and send a Unicast ARP Reply Publishing his MAC
+
+
+				Src ip  : 192.168.13.3
+				Dist ip : 192.168.13.1
+				Dist    : .BBBB
+				Src     : .CCCC            <----  R2 MAc
+
+
+4/ now we know R3 , we send the Unicast ICMP ECHO Request to it 
+
+				Src ip  : 192.168.1.10
+				Dist ip : 192.168.4.10
+			        Dist    : .CCCC            
+				Src     : .BBBB 
+
+
+
+------------------------------    R2  to  R4   ----------------------------------------------------------------------------
+
+
+1/ for 192.168.4.10 , R2 checks the Routing Table and gets a Match with the Static Route we Configured
+
+	S             192.168.4.0/24 [1/0] via 192.168.34.4 
+
+
+R2 doesn't Know the MAC address of the Next hop 192.168.34.4 so he sends an ARP Request 
+
+
+2/ the ARP Request 
+
+				Src ip  : 192.168.34.3     <---- next hop connected IP
+				Dist ip : 192.168.34.4     <----  next hop ip 
+				Dist    : .FFFF            <----  Broadcast
+				Src     : .DDDD            <---- next hop connected MAC
+
+
+
+3/ R4 Receives the Broadcast and send a Unicast ARP Reply Publishing his MAC
+
+
+				Src ip  : 192.168.34.4
+				Dist ip : 192.168.34.3
+				Dist    : .DDDD
+				Src     : .EEEE            <----  R4 MAc
+
+
+4/ now we know R4 , we send the Unicast ICMP ECHO Request to it 
+
+				Src ip  : 192.168.1.10
+				Dist ip : 192.168.4.10
+			        Dist    : .EEEE         
+				Src     : .DDDD
+
+
+------------------------------    R4  to  Pc4   ----------------------------------------------------------------------------
+
+
+1/ for 192.168.4.10 , R4 checks the Routing Table and gets a Match with connected Route
+
+	C             192.168.4.0/24 is directly connected , GigabitEthernet 0/2
+
+
+R4 doesn't Know the MAC address of Pc4 so he sends an ARP Request 
+
+
+2/ the ARP Request 
+
+				Src ip  : 192.168.4.254    <---- interface IP
+				Dist ip : 192.168.4.10     <----  pc4 ip 
+				Dist    : .FFFF            <----  Broadcast
+				Src     : .FFFE            <---- interface MAC
+
+
+
+3/ Pc4 Receives the Broadcast and send a Unicast ARP Reply Publishing his MAC
+
+
+				Src ip  : 192.168.4.10
+				Dist ip : 192.168.4.254
+				Dist    : .FFFE
+				Src     : .4444            <----  RPc4 MAc
+
+
+4/ now we know R4 , we send the Unicast ICMP ECHO Request to it Unicast
+
+				Src ip  : 192.168.1.10
+				Dist ip : 192.168.4.10
+			        Dist    : .4444         
+				Src     : .FFFe
+
+
+pc4 has the same ip as the Destination ip so he receives the Packet and Decapsulates it 
+
+
+
+
+==============================     ICMP ECHO REQUEST   ============================================================================
+
+now that thr Routers know their neighbors MACs , all the the replies will be unicast
+
+icmp Echo Reply :
+				Src ip  : 192.168.4.10   <--- pc4
+				Dist ip : 192.168.1.10   <--- pc1
+
+	
+1/ pc4 will check for the Destination ip of the Reply 
+, since the ip is outside it's network ,pc4 sends it to the default gateway as UNicast
+
+				
+				Src ip  : 192.168.4.10
+				Dist ip : 192.168.1.10
+			        Dist    : .FFFe       
+				Src     : .4444 
+
+---------------------------------------------------------------------------------------------------------------------------------------
+
+2/ R4 receives it and checks his Routing Table for a match for 192.168.1.10/24 and he finds the static route we configured
+
+
+
+	S             192.168.1.0/24 [1/0] via 192.168.34.3 
+
+
+
+so he sends the ICMP EChO REPLY directly to it since he knows the MAC
+
+
+				Src ip  : 192.168.4.10
+				Dist ip : 192.168.1.10
+			        Dist    : .DDDD        
+				Src     : .EEEE
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------------
+
+3/ R3 receives it and checks his Routing Table for a match for 192.168.1.10/24 and he finds the static route we configured
+
+
+	S             192.168.1.0/24 [1/0] via 192.168.13.1 
+
+
+
+so he sends the ICMP EChO REPLY directly to it since he knows the MAC
+
+
+				Src ip  : 192.168.4.10
+				Dist ip : 192.168.1.10
+			        Dist    : .BBBB           
+				Src     : .CCCC  
+
+
+---------------------------------------------------------------------------------------------------------------------------------------
+
+3/ R1 receives it and checks his Routing Table for a match for 192.168.1.10/24 and he finds the connected route of his interface
+
+
+	c                    192.168.1.0/24 is directly connected , GigabitEthernet 0/2
+
+
+so he sends the ICMP EChO REPLY directly to pc1 since he knows the MAC
+
+
+
+				Src ip  : 192.168.4.10
+				Dist ip : 192.168.1.10
+			        Dist    : .1111            
+				Src     : .AAAA  
+
+
+Pc has the same Ip address as the Destination ip so he accepts the frame decapsulates it
+
+
+
+
+#####################################	 Quiz	###################################
+
+all the quiz is after leaarning the MAc addresses
+
+
+## Q1 - pc4 sends a packet to pc1
+. what is the destination MAC address when it is sent from PC4's network interface ?
+
+
+my answer is            .FFFE
+
+solution : ✅ packets of outside the Network goes to the Gateway 
+
+
+
+## Q2 - pc4 sends a packet to pc1
+. what is the source MAC address when it is received on R1's g0/0 interface ?
+
+
+my answer is            .BBBB
+
+solution : ❌  the source is .CCCC , the destination is .BBBB
+
+
+
+
+## Q3 - pc4 sends a packet to pc1
+. what is the source MAC address when it is sent from Sw1's g0/1 interface ?
+
+
+my answer is            .AAAA
+
+solution : ✅
+
+
+
+
+## Q4 - pc4 sends a packet to pc1
+. what is the destination IP address when it is sent from R4's G0/1 interface ?
+
+
+my answer is            .DDDD
+
+solution : ❌ 192.168.1.10, we are searching for the IP not the Mac 
+
+
+## Q5 - pc4 sends a packet to pc1
+. what is the source ip address when it is received on R1's g0/0 interface ?
+
+
+my answer is            .19.168.4.10 
+
+solution : ✅ 
+
+
