@@ -1,0 +1,481 @@
+
+we saw before the IPv4 addressing and the classes within it
+
+but unfortunately th number of networks/host is unsufficient to satisfy the rising number of devices
+
+the scientists who made the internet never thought that the internet will grow at sush a scale
+
+
+==================================================   UnEven Networks   =================================================================================================
+
+
+the Problem :
+
+lets observe this topology
+
+
+            .1.0/24       g0/1                                      g0/1       .4.0/24
+		---------------           .1           .2              ---------------
+            .2.0/24       g0/2  \       g0/0          g0/0       /  g0/2       .5.0/24 
+	       ----------------- router1 -----------------router2 ----------------- 	
+            .3.0/24       g0/3  /          192.168.0.0/24        \  g0/3       .6.0/24	
+		---------------                                    ---------------
+
+
+in the connection of these routers we used 7 Networks, one of them used to connect the two Routers
+
+but are we actually using all the host we reserved? lets see
+
+on Network 192.168.0.0/24 we have :
+
+				Network address : 192.168.0.0
+				broadcast address : 192.168.0.255
+				Router1's G0/0 address : 192.168.0.1
+				Router2's G0/0 address : 192.168.0.2
+
+so from 8 bits of host portion we only used 4 addresses , leaving 
+
+			256 - 4 = 252 non usable addresses
+
+
+
+so in addition to the rising number of devices , we also have unusable addresses on each Network 
+ 
+---------------------------
+
+another example :
+
+
+a company needs a network fit for 5000 host , so they get a class B address from
+		
+			 - IANA - Internet Assigned Numbers Authority -
+
+the problem is class b have 65536 addresses 
+
+				65536 - 5000 = 60536 non uable addresses
+
+
+so we need another addressing architecture to avoid this much of wasted address
+
+
+
+
+=====================================       CIDR      =================================================================================================
+
+
+in 1993   - IETF - Internet Engeneering Task Force - gave a Solution :
+
+		CIDR - Classless Inter-Domain Routing 
+
+
+so instead of relying on /8 , /16 , /24 classes
+
+, we use all the nubers in between to have more flexible Network/Host portions
+
+allowing Bigger Networks to be split to smaller Networks called  - Subnets -
+
+
+-------------------- /24 -----------------------------------
+
+using our previous example : 192.168.0.0/24
+
+we need a Network that supports only  2 hosts
+
+in binary :
+
+		   NetworK             |   Host
+
+ 	11000000   10101000   00000000   00000000 
+	   192   .    168   .     0    .     0
+
+
+        11111111   11111111   11111111   00000000
+           255   .    255   .    255   .     0
+
+	
+ 		8 bits of Host Portion
+
+		2⁸-2 = 254 host   ------------> 252 wasted
+
+
+
+-------------------- /25 -----------------------------------
+
+to split the Network we take a bit from the Host and add it to the Network Portion 
+
+
+so instead of /24 it becomes /25
+
+
+		   NetworK                |  Host
+
+ 	11000000   10101000   00000000   0 0000000 
+	   192   .    168   .     0    .      0
+
+
+        11111111   11111111   11111111   1 0000000
+           255   .    255   .    255   .    128
+
+	
+ 		7 bits of Host Portion
+
+		2⁷-2 = 126 hosts   ------------> 124 wasted
+ 
+
+we keep splitting till we get a fitting Network
+
+-------------------- /26 -----------------------------------
+
+
+		   NetworK                 |  Host
+
+ 	11000000   10101000   00000000   00 000000 
+	   192   .    168   .     0    .      0
+
+
+        11111111   11111111   11111111   11 000000
+           255   .    255   .    255   .    192 
+	
+ 		6 bits of Host Portion
+
+		2⁶-2 = 62 hosts   ------------> 60 wasted
+ 
+
+-------------------- /27 -----------------------------------
+
+
+		   NetworK                  |  Host
+
+ 	11000000   10101000   00000000   000 00000 
+	   192   .    168   .     0    .      0
+
+
+        11111111   11111111   11111111   111 00000
+           255   .    255   .    255   .    224 
+	
+ 		5 bits of Host Portion
+
+		2⁵-2 = 30 hosts   ------------> 28 wasted
+ 
+
+
+-------------------- /28 -----------------------------------
+
+
+		   NetworK                   |  Host
+
+ 	11000000   10101000   00000000   0000 0000 
+	   192   .    168   .     0    .      0
+
+
+        11111111   11111111   11111111   1111 0000
+           255   .    255   .    255   .    240
+	
+ 		4 bits of Host Portion
+
+		2⁴-2 = 14   ------------> 12 wasted
+ 
+
+
+-------------------- /29 -----------------------------------
+
+
+		   NetworK                    |  Host
+
+ 	11000000   10101000   00000000   00000 000 
+	   192   .    168   .     0    .      0
+
+
+        11111111   11111111   11111111   11111 000
+           255   .    255   .    255   .    248
+	
+ 		3 bits of Host Portion
+
+		2³-2 = 6   ------------> 4 wasted
+ 
+
+-------------------- /30 -----------------------------------
+
+
+		   NetworK                     |  Host
+
+ 	11000000   10101000   00000000   000000 00 
+	   192   .    168   .     0    .      0
+
+
+        11111111   11111111   11111111   111111 00
+           255   .    255   .    255   .    252
+	
+ 		2 bits of Host Portion
+
+		2²-2 = 2   ------------>  no wasted addresses
+ 
+
+
+this is the best split for the example we have, a simple Network with only 4 addresses
+2 reserved for Network and Broadcast and 2 for the actual Interfaces that connect the two Routers
+
+ 192.168.0.0/30 means 
+
+		192.168.0.0  -------> Network address
+		192.168.0.1  -------> Router1's interface address
+		192.168.0.2  -------> Router2's interface address
+		192.168.0.3  -------> broadcast address
+	
+
+in binary 
+
+		11000000.10101000.00000000.000000 00  -------> Network address
+		11000000.10101000.00000000.000000 01  -------> Router1's interface address
+		11000000.10101000.00000000.000000 10  -------> Router2's interface address
+		11000000.10101000.00000000.000000 11  -------> broadcast address
+
+
+same Subnet has the Network Portion , only the Network Portion increases
+
+
+
+===============================    /31 and /32 Exception   ======================================================================================================
+
+if we Continue the split we did earlier to /31 what would happen 
+
+
+
+-------------------- /31 -----------------------------------
+
+
+		   NetworK                      |  Host
+
+ 	11000000   10101000   00000000   0000000 0 
+	   192   .    168   .     0    .      0
+
+
+        11111111   11111111   11111111   1111111 0
+           255   .    255   .    255   .    254 
+	
+ 		1 bit of Host Portion
+
+		2¹-2 = 0 hosts   
+ 
+we dont get any usable addresses since the only two we have will be Taken by the Network and Broadcast 
+
+but there is an Exception in this case
+
+
+
+
+lets observe this topology again
+          
+	
+                       g0/0                    g0/0        
+	      router1 ------------------------------router2 
+                      .1       192.168.0.0/24    .2    	
+
+		
+in this point to point connection we only have one facing device on the Network
+
+would unicast and Broad cast be Different ?
+
+the Answer is NO
+
+sending the broadcast in the Network would be specific to the other device
+
+
+so what happend if we did this 
+
+
+                       g0/0                    g0/0        
+	      router1 ------------------------------router2 
+                      .0       192.168.0.0/31    .1    	
+
+
+Router1 :        11000000 10101000 00000000 0000000 0 
+Router2 :        11000000 10101000 00000000 0000000 1
+
+
+##### This is an Exception for point to Point connections only ####
+trying this on a cisco Device would give this Message
+
+%Warning :use /31 mask on non point-to-point interface cautiously 
+
+but the interface would accept it normally 
+
+
+
+-------------------------------   /32   ----------------------------------------------------------------------------------
+
+/32 is used in the Routing Table to identify a specific Host
+
+ 192.168.0.1/32 is the host that has the 192.168.0.1 address 
+
+
+
+
+==================================    other subnets    ===============================================================================
+
+so by splitting the 192.168.0.0/24 into subnet 192.168.0.0/30 we got a 4 addresses New Network
+
+but what happens to the other addresses range
+
+ 192.168.0.4  -   192.168.0.255
+
+
+the rest of the addresses are Now available to be used on other Subnets
+
+
+=========================================================================================================================================
+
+
+lets see some of the CIDR Subnet masks from the /24 Network
+
+  
+                 ________________________________
+     		|                      |         |
+		|   Dotted  decimal    |  CIDR   |
+     		|______________________|_________|
+     		|                      |         |
+		|    255.255.255.128   |   /25   |
+     		|______________________|_________|                
+     		|                      |         |
+		|    255.255.255.128   |   /26   |
+     		|______________________|_________|             
+     		|                      |         |
+		|    255.255.255.128   |   /27   |
+     		|______________________|_________|               
+     		|                      |         |
+		|    255.255.255.128   |   /28   |
+     		|______________________|_________|               
+     		|                      |         |
+		|    255.255.255.128   |   /29   |
+     		|______________________|_________|            
+     		|                      |         |
+		|    255.255.255.128   |   /30   |
+     		|______________________|_________|               
+   		|                      |         |
+		|    255.255.255.128   |   /31   |
+     		|______________________|_________|           
+     		|                      |         |
+		|    255.255.255.128   |   /32   |
+     		|______________________|_________|
+                
+
+=============================    Subnet Split   =======================================================
+
+we want to devide the Nework to 4 switches each has 45 hosts
+
+so we received this Network from IANA  192.168.1.0/24 
+
+how can we split it into 4 subnets
+
+
+
+1/ first we make sure the 8 bits is sufficient for al hosts 
+
+ each subnet has 45 plus 2 for Network/broadcast 
+
+so 47 addresses by subnet
+
+                            47 * 4 = 188
+
+so no problem in the nember of hosts
+
+
+
+2/ lets start with  /30  and go up    
+	
+	/30 		2²-2 = 2   < 45
+
+	/29 		2³-2 = 6   < 45
+
+	/28 		2⁴-2 = 14   < 45
+
+	/27 		2⁵-2 = 30   < 45
+
+	/26 		2⁶-2 = 62   > 45
+
+
+/26 has 62 usable addresses , so it's the most fitting for this situation
+
+
+yes /26 still has some wasted addreses , but it gives us some space for future growth
+
+
+
+#####################################	 Quiz	###################################
+
+using the same Network /26
+
+the first Subnet is 192.168.1.0/26 what are the remaining subnets 
+
+
+Hint :
+	Find the broadcast address of the subnet 1 
+	the next address is the network address for the next one 
+
+
+
+my answers
+  		
+ 			  first subnet
+
+    	Network address 		192.168.1.0/26
+	62 usable addresses  		192.168.1.1/26 - 192.168.1.62/26
+	broad cast address  		192.168.1.63/26
+
+ 			  second subnet
+
+    	Network address 		192.168.1.64/26
+	62 usable addresses  		192.168.1.65/26 - 192.168.1.126/26
+	broad cast address  		192.168.1.127/26
+
+ 			  third subnet
+
+    	Network address 		192.168.1.128/26
+	62 usable addresses  		192.168.1.129/26 - 192.168.1.190/26
+	broad cast address  		192.168.1.191/26
+
+ 			  fourth subnet
+
+    	Network address 		192.168.1.192/26
+	62 usable addresses  		192.168.1.193/26 - 192.168.1.254/26
+	broad cast address  		192.168.1.255/26
+
+
+the solution will be on the next day
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
